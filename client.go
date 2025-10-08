@@ -74,7 +74,8 @@ type Client struct {
 	slogger *slog.Logger
 
 	peerID         PeerID
-	defaultStorage *storage.Client
+	// defaultStorage *storage.Client
+    defaultStorage storage.ClientImpl
 	onClose        []func()
 	dialers        []Dialer
 	listeners      []Listener
@@ -2003,4 +2004,9 @@ func (cl *Client) startPieceHashers() {
 			break
 		}
 	}
+}
+
+// func (cl *Client) SetDefaultStorage(s *storage.Client) {
+func (cl *Client) SetDefaultStorage(s storage.ClientImpl) {
+    cl.defaultStorage = s
 }

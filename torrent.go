@@ -1345,6 +1345,30 @@ func (t *Torrent) haveAllPieces() bool {
 	return t._completedPieces.GetCardinality() == bitmap.BitRange(t.numPieces())
 }
 
+// SetHavePiece marks a specific piece as complete without verifying it.
+// This is used by proxy-seeders to advertise full availability
+// without touching the data on disk.
+func (t *Torrent) SetHavePiece(index int) error {
+	if index < 0 || index >= t.numPieces() {
+		return fmt.Errorf("SetHavePiece: invalid piece index %d (have %d pieces)", index, t.numPieces())
+	}
+	t._completedPieces.Add(bitmap.BitIndex(index))
+	t.deferUpdateComplete()
+	return nil
+}
+
+// SetHaveAllPieces marks every piece as complete efficiently.
+// This uses roaring.Bitmap.AddRange, which is O(1) for large ranges.
+func (t *Torrent) SetHaveAllPieces() error {
+	n := t.numPieces()
+	if n == 0 {
+		return fmt.Errorf("SetHaveAllPieces: torrent has no pieces")
+	}
+	t._completedPieces.AddRange(0, uint64(n))
+	t.deferUpdateComplete()
+	return nil
+}
+
 func (t *Torrent) havePiece(index pieceIndex) bool {
 	return t.haveInfo() && t.pieceComplete(index)
 }

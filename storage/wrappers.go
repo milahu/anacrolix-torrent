@@ -23,12 +23,18 @@ func (cl Client) OpenTorrent(
 	ctx context.Context,
 	info *metainfo.Info,
 	infoHash metainfo.Hash,
-) (*Torrent, error) {
-	t, err := cl.ci.OpenTorrent(ctx, info, infoHash)
+	// ) (*Torrent, error) {
+) (TorrentImpl, error) {
+	// t, err := cl.ci.OpenTorrent(ctx, info, infoHash)
+	// Delegate to the underlying implementation which already returns TorrentImpl.
+	// If the underlying impl currently returns a concrete *Torrent,
+	// ensure that impl.OpenTorrent returns TorrentImpl; this keeps signatures consistent.
+	timpl, err := cl.impl.OpenTorrent(ctx, info, infoHash)
 	if err != nil {
 		return nil, err
 	}
-	return &Torrent{t}, nil
+	// return &Torrent{t}, nil
+	return timpl, nil
 }
 
 type Torrent struct {
